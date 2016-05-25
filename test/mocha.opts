@@ -1,0 +1,7 @@
+--compilers coffee:coffee-script/register
+--require require-yaml
+--timeout 85000
+--ui bdd
+--growl
+--colors
+test/**/*-test.coffee
