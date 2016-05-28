@@ -9,3 +9,4 @@ describe "Status", ->
     chakram.get(rootUrl).then (response)->
       expect(response).to.have.status(200)
       expect(response.body).to.have.started
+      expect(response.body).to.have.uptime
