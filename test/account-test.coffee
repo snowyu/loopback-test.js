@@ -1,11 +1,18 @@
-chakram = require 'chakram'
-debugReq= require 'chakram/lib/debug'
-expect  = chakram.expect
+# set DEBUG=superagent //for windows
+# export DEBUG=superagent //for linux
+chai    = require 'chai'
+expect  = chai.expect
+# chai.use require 'chai-subset'
+
+Promise = require 'bluebird'
 faker   = require 'faker'
+inherits= require 'inherits-ex/lib/inherits'
+Request = require 'loopback-supertest'
+API     = require './abstract-api'
 extend  = require 'util-ex/lib/_extend'
 config  = require '../config'
 rootUrl = config.URL
-apiUrl  = rootUrl + config.apiPath + 'Accounts/'
+apiUrl  = rootUrl + config.apiPath #+ 'Accounts/'
 
 #debugReq.startDebug()
 
@@ -15,53 +22,79 @@ genUser = ->
   mobile: faker.phone.phoneNumber()
   email: faker.internet.email()
 
-register = (user, stCode = 200)->
-  user = genUser() unless user
+class Account
+  inherits Account, API
 
-  chakram.post(apiUrl, user).then (response)->
-    expect(response).to.have.status(stCode)
-    expect(response).to.have.header("content-type", /application\/json/);
-    user.id = response.body.id if stCode is 200
+  constructor: ()->
+    return super 'Accounts'
+  register: (user, stCode = 200)->
+    user = genUser() unless user
+    @createItem user, stCode
+    .then (response)->
+      user.id = response.body.id if stCode is 200
+      response
+  delUser: (user, stCode = 200)->
+    @delItem user, stCode
 
-del = (user, stCode = 200)->
-  url = apiUrl + user.id
-  url = url + '/?access_token=' + user.accessToken if user.accessToken
-  chakram.delete(url).then (response)->
-    expect(response).to.have.status(stCode)
+  getUser: (user, stCode = 200)->
+    @getItem user, stCode
 
-get = (user, stCode = 200)->
-  url = apiUrl + user.id
-  url = url + '/?access_token=' + user.accessToken if user.accessToken
-  chakram.get(url).then (response)->
-    expect(response).to.have.status(stCode)
-    if stCode is 200
-      usr = extend {}, user
-      delete usr.password
-      delete usr.accessToken
-      expect(response).to.comprise.of.json usr
+  editUser: (user, stCode = 200)->
+    @editItem user, stCode
 
-login = (user, stCode = 200)->
-  chakram.post(apiUrl+'login', user).then (response)->
-    expect(response).to.have.status(stCode)
-    if stCode is 200
-      user.accessToken = response.body.id
-      expect(response.body.id).to.have.length.of.at.least 64
+  loginUser: (user, stCode = 200)->
+    self = @
+    @post 'login'
+    .send user
+    .expect stCode
+    .then (response)->
+      if stCode is 200
+        self.accessToken = response.body.id
+        expect(response.body.id).to.have.length.of.at.least 64
+      response
+
 
 describe "Account", ->
+  account = new Account()
   user =
     username: faker.name.findName()
     password: faker.internet.password()
     mobile: faker.phone.phoneNumber()
     email: faker.internet.email()
 
-  before '创建新账号', -> register user
-  after '删除新账号', -> del user if user.id
+  before '创建新账号', ->
+    account.register user
+  after '删除新账号', ->
+    if user.id
+      if account.accessToken?
+        result = account.delUser user
+      else
+        result = account.login user
+        .then -> account.delUser user
+    result
 
-  it "应该可以登录新账号", -> login user
-
+  it "应该可以登录新账号", -> account.loginUser user
   it "应该可以注册新账号", ->
-    if not user.accessToken
-      login(user).then -> get user
+    if account.accessToken?
+      result = account.getUser user
     else
-      get user
+      result = account.login user
+      .then -> account.getUser user
+    result
 
+  it "应该可以注销新账号", ->
+    oldToken = account.accessToken
+    Promise.resolve oldToken
+    .then (hasToken)->
+      if hasToken
+        account.logout()
+      else
+        account.login user
+        .then ->
+          account.logout()
+    .then ->
+      expect(account.accessToken).to.be.null
+      account.accessToken = oldToken
+      account.getUser user, 401
+      .then ->
+        account.accessToken = null

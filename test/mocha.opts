@@ -1,5 +1,6 @@
 --compilers coffee:coffee-script/register
 --require require-yaml
+--require ./test/cfg.js
 --timeout 85000
 --ui bdd
 --growl
