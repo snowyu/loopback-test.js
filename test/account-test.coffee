@@ -10,9 +10,6 @@ inherits= require 'inherits-ex/lib/inherits'
 Request = require 'loopback-supertest'
 API     = require './abstract-api'
 extend  = require 'util-ex/lib/_extend'
-config  = require '../config'
-rootUrl = config.URL
-apiUrl  = rootUrl + config.apiPath #+ 'Accounts/'
 
 #debugReq.startDebug()
 

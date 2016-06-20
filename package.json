@@ -5,6 +5,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "server": "node app",
     "test": "mocha"
   },
   "author": "Riceball LEE",
@@ -17,7 +18,8 @@
     "cson": "^3.0.2",
     "faker": "^3.1.0",
     "inherits-ex": "^1.1.4",
-    "loopback-supertest": "^0.1.7",
+    "loopback-connector-sqlite": "^1.4.0",
+    "loopback-supertest": "^0.1.9",
     "mocha": "^2.5.2",
     "path.js": "^1.0.7",
     "require-yaml": "0.0.1",

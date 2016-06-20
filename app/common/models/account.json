@@ -1,0 +1,49 @@
+{
+  "name": "Account",
+  "description": "User Account",
+  "base": "User",
+  "strictDelete": true,
+  "protected": [
+    "password",
+    "email",
+    "mobile",
+    "mobileVerified",
+    "emailVerified",
+    "verificationToken"
+  ],
+  "properties": {
+    "created": false,
+    "lastUpdated": false,
+    "mobile": {
+      "type": "string",
+      "index": true,
+      "description": "mobile phone No."
+    },
+    "mobileVerified": {
+      "type": "boolean",
+      "description": "the mobile is verified."
+    },
+    "username": {
+      "type": "string",
+      "required": false,
+      "index": true,
+      "description": "login name"
+    },
+    "email": {
+      "type": "string",
+      "required": false,
+      "index": true,
+      "description": "email"
+    },
+    "obj": {
+      "type": [],
+      "required": false,
+      "description": "test json string crashing"
+    }
+  },
+  "validations": [],
+  "relations": {
+  },
+  "acls": [],
+  "methods": {}
+}

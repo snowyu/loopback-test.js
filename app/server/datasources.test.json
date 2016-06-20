@@ -1,0 +1,11 @@
+{
+  "db": {
+    "name": "db",
+    "connector": "memory"
+  },
+  "userDB": {
+    "name": "userDB",
+    "file_name": "./test.sqlite3",
+    "connector": "sqlite"
+  }
+}
